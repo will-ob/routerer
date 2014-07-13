@@ -1,0 +1,7 @@
+--compilers coffee:coffee-script/register
+--reporter spec
+--require backbone
+--require lodash
+--require ./test/init
+--growl
+--debug
