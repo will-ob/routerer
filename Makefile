@@ -6,6 +6,9 @@ build: clean
 dist: build
 	ccjs dist/router.js --LANGUAGE_IN=ECMASCRIPT5 > dist/router.min.js
 
+test: build
+	./node_modules/karma/bin/karma start test/karma.conf.js --single-run
+
 clean:
 	rm -rf dist
 

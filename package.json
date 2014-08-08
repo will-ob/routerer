@@ -6,7 +6,7 @@
   "private": true,
   "repository": "git@github.com:will-ob/this-is-how-i-route.git",
   "scripts": {
-    "test": "mocha"
+    "test": "make test"
   },
   "author": "Will O'Brien <will.obrien@dibit.co>",
   "license": "MIT",
