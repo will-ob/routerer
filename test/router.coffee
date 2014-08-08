@@ -1,4 +1,5 @@
 
+
 Router = router(_, Backbone)
 
 describe "Router", ->
@@ -11,7 +12,7 @@ describe "Router", ->
     expect(Router).to.be.defined
 
   beforeEach ->
-    @route = "things"
+    @route = "things/:stuff"
     @Page = sinon.stub()
     @Page.name = "SomeClassName"
     @Page::close = (->)
@@ -49,6 +50,10 @@ describe "Router", ->
 
       it "constructs with an el", ->
         expect(@opts.el).to.be.defined
+
+      it "constructs with args", ->
+        expect(@opts.args).to.be.defined
+        expect(@opts.args).to.include.keys("stuff")
 
   describe "new page", ->
     class StatsPage

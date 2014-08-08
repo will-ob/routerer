@@ -3193,6 +3193,27 @@ module.exports = function (_, Backbone){
   });
 
 
+  extractArguments = function(protoPath, args){
+    var obj = {},
+        parts = protoPath.split('/');
+
+    if (protoPath == null) protoPath = "";
+    if (args == null) args = [];
+
+    // Only ':'-prefixed parts
+    parts = _.select(parts, function(part){
+      return part[0] == ":"
+    })
+
+    _.each(parts, function(part, idx){
+      var key = part.slice(1) // remove ':'
+      obj[key] = args[idx]
+    })
+
+    return obj
+  }
+
+
 
   // The this is to permit subclassing of router
   // Not a requirement, but makes testing easier
@@ -3203,11 +3224,15 @@ module.exports = function (_, Backbone){
       throw new Error("Page must have a close method");
     }
 
+
     this.prototype.routes[path] = handlerName;
     this.prototype[handlerName] = function() {
+      var args = extractArguments(path, Array.prototype.slice.apply(arguments))
+
       this.currentPage = new page({
         el: document.getElementById('page'),
-        router: this
+        router: this,
+        args: args
       });
     }
   }

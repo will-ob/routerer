@@ -1,8 +1,10 @@
 this-is-how-i-route
 ===================
 
-> This is how I route.   
->  - mims ?
+```
+This is how I route.
+- Mims ?
+```
 
 Slim, testable router.
 
@@ -26,6 +28,10 @@ Router.addRoute("",             IndexPage);
 Add some more
 
 ```
+_        = require('lodash');
+Backbone = require('backbone');
+Router   = require('router')(_, Backbone);
+
 Router.addRoute("login",        LoginPage);
 Router.addRoute("sign-up",     SignUpPage);
 Router.addRoute("account",    AccountPage);
@@ -55,12 +61,16 @@ Ok, but why
 
 Well, testing - and we'll get to that. But first, uniformity:
 
-Every view gets an `el`, and a reference to the `router`.
+Every view gets an `el`, a map of url params, and a reference to the `router`.
 
 ```
+// 'user/:id/images/:page'
+// is == to calling:
+
 new SignUpPage({
   el: $('page-el-owned-by-router'),
-  router: thisRouter
+  router: thisRouter,
+  args: {id: "24", page: "742"}
 });
 ```
 
@@ -84,7 +94,7 @@ And all views are disposed of the same way, automatically, by the router.
 page.close();
 ```
 
-Your router file no longer can slip into a tragedy of the commons, because it is _just_ your routes. You couldn't make a route-handler if you tried. _figure of speech, I'm sure you're quite capable._
+Without some enforced consisntency, your `router` slips into tragedy. With this set-up, the router is _just_ your routes. You couldn't write a `routeHandler` if you tried. _figure of speech, I'm sure you're quite capable._
 
 At the end of the day, the complexity of your router stays pretty constant. There's no chance developers will have to load an exponentially increasing amout of complexity into their heads each time they want to add _a_ route.
 
