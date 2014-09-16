@@ -1,0 +1,27 @@
+{
+  "name": "routerer",
+  "main": "router.js",
+  "version": "0.2.0",
+  "homepage": "https://github.com/will-ob/this-is-how-i-route",
+  "authors": [
+    "Will O'Brien <will.obrien@dibit.co>"
+  ],
+  "description": "A prescriptive routing method",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "Backbone",
+    "Router"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
