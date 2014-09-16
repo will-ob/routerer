@@ -1,27 +1,7 @@
-var request = require('superagent'),
-    Q       = require('q');
-
 module.exports = function (_, Backbone){
 
   var Router = Backbone.Router.extend({
-    routes: {
-      "logout" : "logout"
-    },
-    getCurrentUser: function(){
-      var def = Q.defer(),
-          _this = this;
-
-      request
-        .get('/v1/me')
-        .end(function(resp){
-          if (resp.error.status == 401) {
-            def.reject(new Error("No user signed in."));
-          } else {
-            def.resolve(resp.body);
-          }
-        });
-      return def.promise;
-    },
+    routes: {},
     execute: function(){
       if (_.isObject(this.currentPage)) {
         if (_.isFunction(this.currentPage.close)) {
@@ -31,13 +11,6 @@ module.exports = function (_, Backbone){
         }
       }
       Backbone.Router.prototype.execute.apply(this, arguments);
-    },
-    logout: function(){
-      request
-        .del('/v1/session')
-        .end(function(){
-          window.location.replace('/');
-        });
     }
   });
 
