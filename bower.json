@@ -1,7 +1,7 @@
 {
   "name": "routerer",
   "main": "router.js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "homepage": "https://github.com/will-ob/this-is-how-i-route",
   "authors": [
     "Will O'Brien <will.obrien@dibit.co>"
