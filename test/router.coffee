@@ -1,49 +1,50 @@
 
 
-Router = router(_, Backbone)
+Router = routerer.createRouter(_, Backbone)
+addRoute = routerer.addRoute
 
 describe "Router", ->
 
   class OtherRouter extends Router
-  class Thing
-    close: ->
 
   it "exists", ->
     expect(Router).to.be.defined
 
   beforeEach ->
-    @route = "things/:stuff"
-    @Page = sinon.stub()
-    @Page.name = "SomeClassName"
-    @Page::close = (->)
-    @Page.returns(new Thing)
-    Router.addRoute.call(OtherRouter, @route, @Page)
+    @Router = OtherRouter
 
-  describe ".addRoute", ->
+    @page = sinon.stub()
+    @page.returns((->))
+
+    @route = "things/:stuff"
+
+    addRoute(@Router, @route, @page)
+
+  describe "#addRoute", ->
 
     it "adds a route to the routes", ->
-      expect(OtherRouter::routes).to.include.keys(@route)
+      expect(@Router::routes).to.include.keys(@route)
 
     it "adds handler to the prototype", ->
-      handler = OtherRouter::routes[@route]
-      expect(OtherRouter::[handler]).be.defined
+      handler = @Router::routes[@route]
+      expect(@Router::[handler]).be.defined
 
     describe "handler", ->
       beforeEach ->
         @router = new OtherRouter
         Backbone.history.start(silent:true)
         @router.navigate(@route, {trigger: true})
-        @opts = @Page.args[0][0]
+        @opts = @page.args[0][0]
 
       afterEach ->
         Backbone.history.stop()
         window.location.hash = ""
 
-      it "sets the current page", ->
-        expect(@router.currentPage).to.be.defined
+      it "sets the close fn", ->
+        expect(@router.close).to.be.defined
 
       it "creates a new page", ->
-        expect(@Page.called).to.be.true
+        expect(@page.called).to.be.true
 
       it "constructs with a router", ->
         expect(@opts.router).to.eq(@router)
@@ -56,24 +57,33 @@ describe "Router", ->
         expect(@opts.args).to.include.keys("stuff")
 
   describe "new page", ->
-    class StatsPage
-      close: ->
+
+    # Note that routes must exist on the router before
+    # an instance of the router is constructed. They
+    # cannot be added after that point.
 
     beforeEach ->
-      OtherRouter.addRoute("stats", StatsPage)
+      _this = this
+      @idxPage = -> return _this.closeSpy = sinon.spy()
+
+      addRoute(OtherRouter, "", @idxPage)
+      addRoute(OtherRouter, "stats", -> (->))
+
+      # Set to other so index page is constructed
+      window.location.hash = "other"
       @router = new OtherRouter
+
       Backbone.history.start(silent:true)
-      @router.navigate(@route, {trigger: true})
+      @router.navigate("", {trigger: true})
 
     afterEach ->
       Backbone.history.stop()
 
     it "closes the last page before opening the next", ->
       # Little tricky, 2nd navigate must be a different, valid route
-      # If this fails, ensure stats is valid route
-      spy = sinon.spy(@router.currentPage, "close")
+      # We expect index's close to have been set and now called
       @router.navigate("stats", {trigger: true})
-      expect(spy.called).to.be.true
+      expect(@closeSpy.called).to.be.true
 
 
 

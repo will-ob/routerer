@@ -1,19 +1,14 @@
-module.exports = function (_, Backbone){
+module.exports.createRouter = function (_, Backbone){
 
   var Router = Backbone.Router.extend({
     routes: {},
     execute: function(){
-      if (_.isObject(this.currentPage)) {
-        if (_.isFunction(this.currentPage.close)) {
-          this.currentPage.close();
-        } else {
-          console.warn('Page has no `close` method!');
-        }
+      if (_.isFunction(this.close)) {
+        this.close();
       }
       Backbone.Router.prototype.execute.apply(this, arguments);
     }
   });
-
 
   // Returns an object of the arguments indexed by their
   // name in the protoPath.
@@ -47,30 +42,26 @@ module.exports = function (_, Backbone){
 
     return obj;
   };
-
-
-
-  // The this is to permit subclassing of router
-  // Not a requirement, but makes testing easier
-  Router.addRoute = function(path, page){
-    var handlerName = _.uniqueId("handler");
-
-    if (! page.prototype.close ){
-      throw new Error("Page must have a close method");
-    }
-
-
-    this.prototype.routes[path] = handlerName;
-    this.prototype[handlerName] = function() {
-      var args = extractArguments(path, Array.prototype.slice.apply(arguments));
-
-      this.currentPage = new page({
-        el: document.getElementById('page'),
-        router: this,
-        args: args
-      });
-    };
-  };
   return Router;
+};
+
+module.exports.addRoute = function(Router, path, pageInitFn){
+  var handlerName = _.uniqueId("handler");
+
+  Router.prototype.routes = Router.prototype.routes || {};
+  Router.prototype.routes[path] = handlerName;
+  Router.prototype[handlerName] = function() {
+    var args = extractArguments(path, Array.prototype.slice.apply(arguments));
+
+    this.close = pageInitFn({
+      el: document.getElementById('page'),
+      router: this,
+      args: args
+    });
+
+    if ( ! _.isFunction(this.close) ) {
+      console.warn("Page's init function did not return a `close` function.");
+    }
+  };
 };
 
