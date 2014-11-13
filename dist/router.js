@@ -41,6 +41,16 @@ module.exports.createRouter = function (_, Backbone){
       obj[key] = args[idx];
     });
 
+    // Add queryString as options argument.
+    if (args[parts.length]) {
+      querys = (_ref = args[parts.length]) != null ? _ref.split('&') : null;
+      obj['options'] = {};
+      _.each(querys, function(q) {
+          key_val = q.split('=');
+          obj['options'][key_val[0]] = key_val[1];
+      });
+    }
+ 
     return obj;
   };
   return Router;
