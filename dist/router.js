@@ -26,7 +26,7 @@ module.exports.createRouter = function (_, Backbone){
   // passed by Backbone to the handler function
   extractArguments = function(protoPath, args){
     var obj = {},
-        parts = protoPath.split('/');
+        parts = protoPath.split(/\/|\?/);
 
     if (protoPath === null) protoPath = "";
     if (args === null) args = [];
@@ -38,18 +38,20 @@ module.exports.createRouter = function (_, Backbone){
 
     _.each(parts, function(part, idx){
       var key = part.slice(1); // remove ':'
-      obj[key] = args[idx];
-    });
 
-    // Add queryString as options argument.
-    if (args[parts.length]) {
-      querys = (_ref = args[parts.length]) != null ? _ref.split('&') : null;
-      obj['options'] = {};
-      _.each(querys, function(q) {
+      // In case of queryString
+      if(/\w+=\w+(\&\w+=\w+)*/g.test(args[idx])){
+        querys = (_ref = args[idx]) != null ? _ref.split('&') : null;
+        obj[key] = {};
+        _.each(querys, function(q) {
           key_val = q.split('=');
-          obj['options'][key_val[0]] = key_val[1];
-      });
-    }
+          obj[key][key_val[0]] = key_val[1];
+        });
+
+      } else {
+        obj[key] = args[idx];
+      }
+    });
  
     return obj;
   };
