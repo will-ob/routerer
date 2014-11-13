@@ -44,6 +44,20 @@ module.exports = function (_, Backbone){
     _.each(parts, function(part, idx){
       var key = part.slice(1); // remove ':'
       obj[key] = args[idx];
+
+      // In case of queryString
+      if(/\w+=\w+(\&\w+=\w+)*/g.test(args[idx])){
+        querys = (_ref = args[idx]) != null ? _ref.split('&') : null;
+        obj[key] = {};
+        _.each(querys, function(q) {
+          key_val = q.split('=');
+          obj[key][key_val[0]] = key_val[1];
+        });
+
+      } else {
+        obj[key] = args[idx];
+      }
+
     });
 
     return obj;
