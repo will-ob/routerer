@@ -15,52 +15,88 @@ module.exports = function (_, Backbone){
     }
   });
 
+  // Re
+  extractUrlParams = function(str){
+    var params = {};
 
-  // Returns an object of the arguments indexed by their
-  // name in the protoPath.
+    if (str === null) { str = ""; }
+
+    // Split by '&', process each as a kv pair
+    _.each(str.split('&'), function(kvStr){
+      pair = kvStr.split('=');
+
+      if (pair.length == 1) {
+        params[pair[0]] = void 0;
+      } else {
+        // Add key/value to params
+        params[pair[0]] = pair[1] || null;
+      }
+    });
+
+    return params;
+  }
+
+  // Returns an pojso containing the args parsed from
+  // the protyotype path and actual path. It also
+  // includes the parameter string if there is one. And
+  // finally, an object of parameters parsed from
+  // the parameter string.
   //
-  // Eg. protoPath: '/users/:user_id/hats/:hat_id'
-  //     args: [246, 7]
+  // Eg. protoPath: '/users/:user_id/hats/:hat_id?admin=true&stuff'
+  //     args: ['246', '7']
   //
-  //     Would return { user_id: 246, hat_id: 7 }
+  //     Would return:
+  //
+  //       {
+  //         args: { user_id: '246', hat_id: '7' },
+  //         urlParamsStr: 'admin=true&stuff',
+  //         urlParams: { admin: 'true', stuff: undefined }
+  //       }
   //
   // protoPath - (string) the Backbone router path from
   // which args was derrived from.
   //
   // args - (array) arguments array that would have been
   // passed by Backbone to the handler function
-  extractArguments = function(protoPath, args){
-    var obj = {},
+  extractUrlData = function(protoPath, args){
+    var urlParamsStr,
+        urlParams,
+        obj = {},
         parts = protoPath.split('/');
 
     if (protoPath === null) protoPath = "";
     if (args === null) args = [];
 
-    // Only ':'-prefixed parts
+    // Select ':'-prefixed parts
     parts = _.select(parts, function(part){
       return part[0] == ":";
     });
 
+    // Add each :-prefixed part and its corresponding
+    // value to the return object
     _.each(parts, function(part, idx){
       var key = part.slice(1); // remove ':'
       obj[key] = args[idx];
-
-      // In case of queryString
-      if(/\w+=\w+(\&\w+=\w+)*/g.test(args[idx])){
-        querys = (_ref = args[idx]) != null ? _ref.split('&') : null;
-        obj[key] = {};
-        _.each(querys, function(q) {
-          key_val = q.split('=');
-          obj[key][key_val[0]] = key_val[1];
-        });
-
-      } else {
-        obj[key] = args[idx];
-      }
-
     });
 
-    return obj;
+    if((parts.length+1) == args.length) {
+      // Add in URL params, which is the last
+      // argument passed to the handler since Backbone 1.1.1
+      var urlParamsStr = args.slice(-1).pop();
+      var urlParams = extractUrlParams(urlParamsStr)
+    } else if ((parts.length+1) < args.length)  {
+      console.warn(
+        "Routerer: Assumptions violated. " +
+        "Please report pattern and path to " +
+        "https://github.com/will-ob/routerer/issues"
+      );
+    }
+
+    return {
+      args: obj,
+      urlParams: (urlParams || []),
+      urlParamsStr: (urlParamsStr || null)
+    };
   };
 
 
@@ -74,16 +110,15 @@ module.exports = function (_, Backbone){
       throw new Error("Page must have a close method");
     }
 
-
     this.prototype.routes[path] = handlerName;
     this.prototype[handlerName] = function() {
-      var args = extractArguments(path, Array.prototype.slice.apply(arguments));
+      var pageInitOptions;
 
-      this.currentPage = new page({
-        el: document.getElementById('page'),
-        router: this,
-        args: args
-      });
+      pageInitOptions = extractUrlData(path, Array.prototype.slice.apply(arguments));
+      pageInitOptions.router = this;
+      pageInitOptions.el = document.getElementById('page');
+
+      this.currentPage = new page(pageInitOptions);
     };
   };
   return Router;
