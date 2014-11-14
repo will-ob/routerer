@@ -5,7 +5,12 @@ module.exports = function (_, Backbone){
     execute: function(){
       if (_.isObject(this.currentPage)) {
         if (_.isFunction(this.currentPage.close)) {
-          this.currentPage.close();
+          try {
+            this.currentPage.close();
+          } catch (e) {
+            console.error("Routerer: Error trying to close ", this.currentPage);
+            console.error(e);
+          }
         } else {
           console.warn('Page has no `close` method!');
         }
@@ -33,7 +38,7 @@ module.exports = function (_, Backbone){
     });
 
     return params;
-  }
+  };
 
   // Returns an pojso containing the args parsed from
   // the protyotype path and actual path. It also
@@ -81,8 +86,8 @@ module.exports = function (_, Backbone){
     if((parts.length+1) == args.length) {
       // Add in URL params, which is the last
       // argument passed to the handler since Backbone 1.1.1
-      var urlParamsStr = args.slice(-1).pop();
-      var urlParams = extractUrlParams(urlParamsStr)
+      urlParamsStr = args.slice(-1).pop();
+      urlParams = extractUrlParams(urlParamsStr);
     } else if ((parts.length+1) < args.length)  {
       console.warn(
         "Routerer: Assumptions violated. " +
